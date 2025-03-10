@@ -1,0 +1,64 @@
+- name: Install phpMyAdmin
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Ensure dependencies are installed
+      ansible.builtin.apt:
+        name:
+          - unzip
+          - wget
+        state: present
+
+    - name: Ensure /var/www/ directory exists
+      ansible.builtin.file:
+        path: /var/www/
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+
+    - name: Download phpMyAdmin latest version
+      ansible.builtin.get_url:
+        url: "https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip"
+        dest: "/var/www/phpMyAdmin-latest-all-languages.zip"
+        mode: "0644"
+
+    - name: Unzip phpMyAdmin
+      ansible.builtin.unarchive:
+        src: "/var/www/phpMyAdmin-latest-all-languages.zip"
+        dest: "/var/www/"
+        remote_src: yes
+
+    - name: Remove downloaded zip file
+      ansible.builtin.file:
+        path: "/var/www/phpMyAdmin-latest-all-languages.zip"
+        state: absent
+
+    - name: Find extracted phpMyAdmin directory
+      ansible.builtin.find:
+        paths: /var/www/
+        patterns: "phpMyAdmin-*-all-languages"
+        file_type: directory
+      register: pma_directory
+
+    - name: Rename phpMyAdmin directory
+      ansible.builtin.command: mv "{{ pma_directory.files[0].path }}" /var/www/phpmyadmin
+      args:
+        creates: /var/www/phpmyadmin # Ensures idempotency
+
+    - name: Copy config sample to config.inc.php
+      ansible.builtin.copy:
+        src: "/var/www/phpmyadmin/config.sample.inc.php"
+        dest: "/var/www/phpmyadmin/config.inc.php"
+        remote_src: yes
+        mode: "0644"
+
+    - name: Ensure phpMyAdmin directory is owned by www-data
+      ansible.builtin.file:
+        path: /var/www/phpmyadmin
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+        recurse: yes

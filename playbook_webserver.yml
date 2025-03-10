@@ -1,0 +1,34 @@
+- name: Setup OpenLiteSpeed and PHP
+  hosts: all
+  become: yes
+  vars:
+    admin_user: "admin"
+
+  tasks:
+    - name: Add OpenLiteSpeed repository
+      shell: |
+        wget -O - https://repo.litespeed.sh | bash
+      args:
+        executable: /bin/bash
+
+    - name: Install OpenLiteSpeed
+      apt:
+        name: openlitespeed
+        state: present
+        update_cache: yes
+
+    - name: Install LSPHP 8.1
+      apt:
+        name:
+          - lsphp83
+          - lsphp83-common
+          - lsphp83-imap
+          - lsphp83-mysql
+          - lsphp83-opcache
+        state: present
+
+    - name: Enable and start OpenLiteSpeed
+      systemd:
+        name: lsws
+        enabled: yes
+        state: started

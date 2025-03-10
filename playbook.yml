@@ -1,0 +1,45 @@
+- name: Setup Webserver
+  hosts: all
+  become: yes
+  vars:
+    s3_backup_bucket: "{{ s3_backup_bucket }}"
+    s3_backup_dir: "{{ s3_backup_dir }}"
+    aws_region_backup: "{{ aws_region_backup }}"
+    mariadb_admin_user: "{{ mariadb_admin_user }}"
+    ols_admin_user: "{{ ols_admin_user }}"
+
+- name: Pre Setup
+  ansible.builtin.import_playbook: playbook_pre.yml
+
+- name: Setup OpenLiteSpeed and PHP
+  ansible.builtin.import_playbook: playbook_webserver.yml
+
+- name: Setup MariaDB
+  ansible.builtin.import_playbook: playbook_db.yml
+
+- name: Setup phpMyAdmin
+  ansible.builtin.import_playbook: playbook_phpmyadmin.yml
+
+- name: Setup Firewall
+  ansible.builtin.import_playbook: playbook_firewall.yml
+
+- name: Setup Backups
+  import_playbook: backup/playbook.yml
+  vars:
+    s3_backup_bucket: "{{ s3_backup_bucket }}"
+    s3_backup_dir: "{{ s3_backup_dir }}"
+    aws_region_backup: "{{ aws_region_backup }}"
+
+- name: Post Setup
+  ansible.builtin.import_playbook: playbook_post.yml
+
+# First-boot initialization scripts (via cloud-init)
+- name: Setup MariaDB first-boot initialization
+  ansible.builtin.import_playbook: playbook_init_db.yml
+  vars:
+    mariadb_admin_user: "{{ mariadb_admin_user }}"
+
+- name: Setup OpenLiteSpeed first-boot initialization
+  ansible.builtin.import_playbook: playbook_init_ols.yml
+  vars:
+    admin_user: "{{ ols_admin_user }}"

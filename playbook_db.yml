@@ -1,0 +1,74 @@
+- name: Setup MariaDB
+  hosts: all
+  become: yes
+  vars:
+    db_admin_user: "{{ db_admin_user }}"
+
+  tasks:
+    - name: Add MariaDB repository
+      shell: |
+        wget -O - https://r.mariadb.com/downloads/mariadb_repo_setup | bash
+      args:
+        executable: /bin/bash
+
+    - name: Install db and python plugin
+      apt:
+        name:
+          - python3-pymysql
+          - mariadb-server
+          - mariadb-client
+          - mariadb-backup
+        state: present
+        update_cache: yes
+
+    - name: Enable and start MariaDB
+      systemd:
+        name: mariadb
+        enabled: yes
+        state: started
+
+    - name: Change MySQL root authentication to UNIX socket
+      community.mysql.mysql_query:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        query: "ALTER USER 'root'@'localhost' IDENTIFIED WITH unix_socket;"
+
+    - name: Flush privileges
+      community.mysql.mysql_query:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        query: "FLUSH PRIVILEGES;"
+
+    - name: Remove anonymous MySQL users
+      community.mysql.mysql_user:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: ""
+        host_all: yes
+        state: absent
+        column_case_sensitive: false
+
+    - name: Disallow root login remotely
+      community.mysql.mysql_user:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: root
+        host: "{{ item }}"
+        state: absent
+        column_case_sensitive: false
+      loop:
+        - "%"
+        - "0.0.0.0"
+        - "::"
+
+    - name: Remove test database
+      community.mysql.mysql_db:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: test
+        state: absent
+
+    - name: Remove privileges for test database
+      community.mysql.mysql_query:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        query: "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'"
+
+    - name: Reload privilege tables
+      community.mysql.mysql_query:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        query: "FLUSH PRIVILEGES;"

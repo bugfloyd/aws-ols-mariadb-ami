@@ -1,0 +1,35 @@
+- name: Pre-Setup
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update apt packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Remove unnecessary packages
+      apt:
+        name:
+          - snapd
+          - landscape-common
+          - unattended-upgrades
+        state: absent
+
+    - name: Install required packages
+      apt:
+        name:
+          - curl
+          - cloud-init
+        state: present
+
+    - name: Disable root SSH login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: "PermitRootLogin no"
+        state: present
+
+    - name: Restart SSH service
+      service:
+        name: ssh
+        state: restarted

@@ -1,0 +1,7 @@
+- name: Pre-Setup
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Clean package cache
+      shell: apt-get clean && rm -rf /var/lib/apt/lists/*
