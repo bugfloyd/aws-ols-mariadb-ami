@@ -58,7 +58,7 @@ source "amazon-ebs" "ols_mariadb" {
   }
 
   tags = {
-    Name = "PackerBuilder"
+    Name = "OLS-Webserver"
   }
 }
 

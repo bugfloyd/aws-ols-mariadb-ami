@@ -46,13 +46,61 @@
           echo "MariaDB credential generation completed successfully."
         mode: "0755"
 
+    - name: Create OpenLiteSpeed password generation script
+      copy:
+        dest: /usr/local/bin/ols-init.sh
+        content: |
+          #!/bin/bash
+          set -e
+
+          # Log all output
+          exec > >(tee /var/log/ols-init.log) 2>&1
+
+          echo "Starting OpenLiteSpeed admin password generation on first boot..."
+
+          # Generate a strong random password (24 alphanumeric chars)
+          OLS_PASSWORD=$(openssl rand -base64 32 | tr -d "=/+" | cut -c1-24)
+
+          # Generate the encrypted password for OpenLiteSpeed
+          # We need to use the OpenLiteSpeed password encryption tool
+          ENCRYPTED_PASS=$(/usr/local/lsws/admin/fcgi-bin/admin_php \
+                          -c /usr/local/lsws/admin/conf/php.ini \
+                          -q /usr/local/lsws/admin/misc/htpasswd.php "$OLS_PASSWORD")
+
+          # Update the OpenLiteSpeed htpasswd file
+          ADMIN_USER="{{ ols_admin_user | default('admin') }}"
+          sed -i "/^$ADMIN_USER:/d" /usr/local/lsws/admin/conf/htpasswd
+          echo "$ADMIN_USER:$ENCRYPTED_PASS" >> /usr/local/lsws/admin/conf/htpasswd
+
+          # Create credentials file for user access
+          CREDS_FILE="/home/ubuntu/openlitespeed_credentials.txt"
+          cat > $CREDS_FILE << EOF
+          # OpenLiteSpeed Admin Credentials
+          Username: $ADMIN_USER
+          Password: $OLS_PASSWORD
+
+          # Admin URL: https://your-server-ip:7080
+          EOF
+
+          # Set proper permissions
+          chown ubuntu:ubuntu $CREDS_FILE
+          chmod 600 $CREDS_FILE
+
+          # Restart OpenLiteSpeed to apply changes
+          systemctl restart lsws
+
+          echo "OpenLiteSpeed admin password generation completed successfully."
+        mode: "0755"
+
     - name: Create cloud-init configuration
       copy:
-        dest: /etc/cloud/cloud.cfg.d/99_db_init.cfg
+        dest: /etc/cloud/cloud.cfg.d/99_ols_init.cfg
         content: |
           #cloud-config
           runcmd:
             - systemctl start mariadb
             - /usr/local/bin/db-init.sh
+            - /usr/local/bin/ols-init.sh
             - rm -f /usr/local/bin/db-init.sh
+            - rm -f /usr/local/bin/ols-init.sh
         mode: "0644"
