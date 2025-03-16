@@ -29,12 +29,12 @@
     mariadb_admin_user: "{{ mariadb_admin_user }}"
     ols_admin_user: "{{ ols_admin_user }}"
 
-- name: Post Setup
-  ansible.builtin.import_playbook: playbook_post.yml
-
 - name: Setup Backups
   import_playbook: backup/playbook.yml
   vars:
     s3_backup_bucket: "{{ s3_backup_bucket }}"
     s3_backup_dir: "{{ s3_backup_dir }}"
     aws_region_backup: "{{ aws_region_backup }}"
+
+- name: Post Setup
+  ansible.builtin.import_playbook: playbook_post.yml

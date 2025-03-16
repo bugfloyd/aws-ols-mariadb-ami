@@ -43,7 +43,7 @@ s3_backup_bucket = "backups.bucket"
 Run the following command to initialize Packer:
 
 ```sh
-packer init .
+packer init ami.pkr.hcl
 ```
 
 ### 2. Validate Configuration
