@@ -12,9 +12,22 @@
       apt:
         name:
           - snapd
+          - lxd-agent-loader
+          - command-not-found
+          - python3-commandnotfound
+          - apport
+          - apport-core-dump-handler
+          - apport-symptoms
+          - python3-apport
+          - open-iscsi
+          - multipath-tools
+          - motd-news-config
           - landscape-common
-          - unattended-upgrades
+          - ubuntu-pro-auto-attach
+          - ubuntu-pro-client
+          - ubuntu-pro-client-l10n
         state: absent
+        purge: yes
 
     - name: Install required packages
       apt:
@@ -22,6 +35,27 @@
           - curl
           - cloud-init
         state: present
+
+    - name: Configure unattended-upgrades for security updates only
+      copy:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        content: |
+          Unattended-Upgrade::Origins-Pattern {
+              "o=Ubuntu,a=${distro_codename}-security";
+          };
+          Unattended-Upgrade::Package-Blacklist {
+          };
+          Unattended-Upgrade::Automatic-Reboot "false";
+          Unattended-Upgrade::MinimalSteps "true";
+          Unattended-Upgrade::Remove-Unused-Dependencies "true";
+
+    - name: Enable unattended-upgrades
+      copy:
+        dest: /etc/apt/apt.conf.d/20auto-upgrades
+        content: |
+          APT::Periodic::Update-Package-Lists "1";
+          APT::Periodic::Unattended-Upgrade "1";
+          APT::Periodic::AutocleanInterval "7";
 
     - name: Disable root SSH login
       lineinfile:

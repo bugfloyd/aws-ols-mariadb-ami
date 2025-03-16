@@ -1,8 +1,6 @@
 - name: Setup OpenLiteSpeed and PHP
   hosts: all
   become: yes
-  vars:
-    admin_user: "admin"
 
   tasks:
     - name: Add OpenLiteSpeed repository

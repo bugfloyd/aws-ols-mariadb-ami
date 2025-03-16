@@ -1,8 +1,6 @@
 - name: Setup MariaDB
   hosts: all
   become: yes
-  vars:
-    db_admin_user: "{{ db_admin_user }}"
 
   tasks:
     - name: Add MariaDB repository
