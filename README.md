@@ -2,6 +2,11 @@
 
 This project creates an Amazon Machine Image (AMI) for a web server instance, pre-configured with OpenLiteSpeed, MariaDB, PHP, and backup automation. The AMI can be used later to launch identical web server instances on AWS.
 
+## Detailed Documentation
+
+For a complete explanation of how this AMI works, including detailed Packer and Ansible playbooks breakdowns, visit my blog post:  
+[The Ultimate AWS AMI for WordPress Servers: Automating OpenLiteSpeed & MariaDB Deployment with Packer and Ansible](https://bugfloyd.com/ultimate-aws-ami-wordpress-servers-packer-ansible)
+
 ## Features
 
 - **Ubuntu 24-based web server** with OpenLiteSpeed, LSPHP, and MariaDB.
