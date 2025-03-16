@@ -73,15 +73,13 @@ packer build -var-file=variables.pkrvars.hcl ami.pkr.hcl
 
 ### **Ansible Playbooks**
 
-| Playbook                  | Purpose                                                |
-| ------------------------- | ------------------------------------------------------ |
-| `playbook_pre.yml`        | Pre-setup tasks (e.g., package updates).               |
-| `playbook_webserver.yml`  | Installs OpenLiteSpeed, PHP, and dependencies.         |
-| `playbook_db.yml`         | Installs MariaDB and secures database access.          |
-| `playbook_phpmyadmin.yml` | Installs and configures phpMyAdmin.                    |
-| `playbook_backups.yml`    | Configures automatic backups to S3.                    |
-| `playbook_firewall.yml`   | Sets up firewall rules.                                |
-| `playbook_post.yml`       | Cleans up temporary files.                             |
-| `playbook_init_db.yml`    | Setup MariaDB first-boot initialization                |
-| `playbook_init_ols.yml`   | Setup OpenLiteSpeed first-boot initialization          |
-| `backup/playbook.yml`     | Backup/Restore script installed through git submodules |
+| Playbook                  | Purpose                                                 |
+| ------------------------- | ------------------------------------------------------- |
+| `playbook_pre.yml`        | Pre-setup tasks (e.g., package updates).                |
+| `playbook_webserver.yml`  | Installs OpenLiteSpeed, PHP, and dependencies.          |
+| `playbook_db.yml`         | Installs MariaDB and secures database access.           |
+| `playbook_phpmyadmin.yml` | Installs and configures phpMyAdmin.                     |
+| `playbook_firewall.yml`   | Sets up firewall rules.                                 |
+| `playbook_init.yml`       | Setup OpenLiteSpeed & MariaDB first-boot initialization |
+| `playbook_post.yml`       | Cleans up temporary files.                              |
+| `backup/playbook.yml`     | Backup/Restore script installed through git submodules  |
