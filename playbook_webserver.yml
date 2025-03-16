@@ -1,6 +1,8 @@
 - name: Setup OpenLiteSpeed and PHP
   hosts: all
   become: yes
+  vars:
+    php_version: "83"
 
   tasks:
     - name: Add OpenLiteSpeed repository
@@ -18,12 +20,18 @@
     - name: Install LSPHP 8.1
       apt:
         name:
-          - lsphp83
-          - lsphp83-common
-          - lsphp83-imap
-          - lsphp83-mysql
-          - lsphp83-opcache
+          - lsphp{{ php_version }}
+          - lsphp{{ php_version }}-common
+          - lsphp{{ php_version }}-imap
+          - lsphp{{ php_version }}-mysql
+          - lsphp{{ php_version }}-opcache
         state: present
+
+    - name: Create a symbolic link for PHP
+      file:
+        src: /usr/local/lsws/lsphp{{ php_version }}/bin/php
+        dest: /usr/bin/php
+        state: link
 
     - name: Enable and start OpenLiteSpeed
       systemd:

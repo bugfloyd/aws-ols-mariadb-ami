@@ -16,6 +16,7 @@
         proto: tcp
       loop:
         - "80"
+        - "8088"
         - "443"
 
     - name: Allow SSH
