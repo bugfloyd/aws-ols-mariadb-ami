@@ -26,19 +26,14 @@ For a complete explanation of how this AMI works, including detailed Packer and 
 
 This project uses the following variables, defined in `variables.pkrvars.hcl`:
 
-| Variable            | Description                                                  |
-| ------------------- | ------------------------------------------------------------ |
-| `aws_region_main`   | Primary AWS region for building the AMI.                     |
-| `aws_region_backup` | Secondary AWS region for backup storage.                     |
-| `s3_backup_bucket`  | S3 bucket name for backups.                                  |
-| `s3_backup_dir`     | Directory inside the S3 bucket (default: `ec2-backups/ols`). |
+| Variable        | Description                                                  |
+|-----------------|--------------------------------------------------------------|
+| `aws_region`    | AWS region for building the AMI.                             |
 
 Example `variables.pkrvars.hcl` file:
 
 ```hcl
-aws_region_main = "eu-west-1"
-aws_region_backup = "eu-central-1"
-s3_backup_bucket = "backups.bucket"
+aws_region = "eu-west-1"
 ```
 
 ## Usage
