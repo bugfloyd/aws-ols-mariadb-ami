@@ -97,6 +97,7 @@ build {
   provisioner "ansible" {
     playbook_file = local.playbook_file
     extra_arguments = [
+      "-e", "aws_region=${var.aws_region}",
       "-e", "mariadb_admin_user=${var.mariadb_admin_user}",
       "-e", "ols_admin_user=${var.ols_admin_user}",
       "--scp-extra-args", "'-O'" # To resolve https://github.com/hashicorp/packer/issues/11783

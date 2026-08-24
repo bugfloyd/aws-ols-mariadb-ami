@@ -30,3 +30,21 @@
         fi
       args:
         executable: /bin/bash
+
+    # Systems Manager agent, from the standalone package rather than the snap.
+    #
+    # Ubuntu ships amazon-ssm-agent as a snap, and playbook_pre purges snapd -
+    # deliberately, because snap auto-refresh updates packages on its own
+    # schedule, and these instances are meant to change only through a new image
+    # and a rolling refresh. The .deb gives Session Manager, Run Command and
+    # port forwarding without bringing that back.
+    - name: Install the SSM agent
+      ansible.builtin.apt:
+        deb: "https://s3.{{ aws_region }}.amazonaws.com/amazon-ssm-{{ aws_region }}/latest/debian_amd64/amazon-ssm-agent.deb"
+        state: present
+
+    - name: Enable and start the SSM agent
+      ansible.builtin.systemd:
+        name: amazon-ssm-agent
+        enabled: yes
+        state: started
