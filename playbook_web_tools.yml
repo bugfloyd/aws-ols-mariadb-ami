@@ -1,0 +1,32 @@
+- name: Install web tier tooling
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install shared storage and database client packages
+      apt:
+        name:
+          # EFS is mounted with the stock NFS 4.1 client. amazon-efs-utils would
+          # add TLS in transit and IAM authorisation, but it is not packaged for
+          # Ubuntu and building v3 from source needs Rust 1.91+, Go, CMake and
+          # Perl - far too much machinery to bake into this image. Traffic stays
+          # inside private subnets with the mount targets locked to the web tier
+          # security group.
+          - nfs-common
+          # Matches the RDS engine version. The MariaDB client cannot speak
+          # MySQL 8.0's default caching_sha2_password authentication.
+          - mysql-client-core-8.0
+          - unzip
+        state: present
+        update_cache: yes
+
+    - name: Install AWS CLI if not present
+      shell: |
+        if ! command -v aws &> /dev/null; then
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+          unzip -q /tmp/awscliv2.zip -d /tmp
+          /tmp/aws/install
+          rm -rf /tmp/aws /tmp/awscliv2.zip
+        fi
+      args:
+        executable: /bin/bash

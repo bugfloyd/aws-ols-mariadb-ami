@@ -1,0 +1,28 @@
+- name: Clean provisioning artefacts
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Find stray tilde directories left in the home directory
+      ansible.builtin.find:
+        paths: /home/ubuntu
+        patterns: "~*"
+        file_type: any
+        hidden: yes
+      register: stray_dirs
+
+    - name: Remove them
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ stray_dirs.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+
+    - name: Remove the Ansible temp directory
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /home/ubuntu/.ansible
+        - /tmp/.ansible

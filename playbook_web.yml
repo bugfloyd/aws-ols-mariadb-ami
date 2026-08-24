@@ -1,0 +1,27 @@
+# Web tier image. Runs OpenLiteSpeed and PHP only: the database lives in RDS
+# and the document root lives on EFS, so nothing stateful is installed here.
+#
+# Deliberately omitted compared to playbook.yml:
+#   playbook_db.yml         - MariaDB, replaced by RDS
+#   playbook_phpmyadmin.yml - would be shadowed by the EFS mount at /var/www
+#   playbook_init.yml       - generates per-instance credentials, which is
+#                             meaningless when instances are interchangeable
+#   backup/playbook.yml     - replaced by RDS automated backups and AWS Backup
+
+- name: Pre Setup
+  ansible.builtin.import_playbook: playbook_pre.yml
+
+- name: Setup OpenLiteSpeed and PHP
+  ansible.builtin.import_playbook: playbook_webserver.yml
+
+- name: Setup web tier tooling
+  ansible.builtin.import_playbook: playbook_web_tools.yml
+
+- name: Setup Firewall
+  ansible.builtin.import_playbook: playbook_firewall.yml
+
+- name: Post Setup
+  ansible.builtin.import_playbook: playbook_post.yml
+
+- name: Clean provisioning artefacts
+  ansible.builtin.import_playbook: playbook_cleanup.yml
