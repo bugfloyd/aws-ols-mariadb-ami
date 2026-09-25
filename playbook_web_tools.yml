@@ -1,17 +1,16 @@
 - name: Install web tier tooling
   hosts: all
   become: yes
+  vars:
+    php_version: "83"
 
   tasks:
     - name: Install shared storage and database client packages
       apt:
         name:
-          # EFS is mounted with the stock NFS 4.1 client. amazon-efs-utils would
-          # add TLS in transit and IAM authorisation, but it is not packaged for
-          # Ubuntu and building v3 from source needs Rust 1.91+, Go, CMake and
-          # Perl - far too much machinery to bake into this image. Traffic stays
-          # inside private subnets with the mount targets locked to the web tier
-          # security group.
+          # The shared file system (FSx for OpenZFS in aws-wp) is mounted with
+          # the stock NFS 4.2 client. No vendor mount helper is needed: the file
+          # system sits in data subnets locked to the web tier's security group.
           - nfs-common
           # Matches the RDS engine version. The MariaDB client cannot speak
           # MySQL 8.0's default caching_sha2_password authentication.
@@ -19,6 +18,25 @@
           - unzip
         state: present
         update_cache: yes
+
+    # PHP extensions WordPress relies on, beyond what playbook_webserver.yml
+    # installs for both profiles. Web profile only, so the standalone image
+    # behind the published post does not change.
+    #
+    # curl is the one that matters. Without it WordPress's HTTP library falls
+    # back to a socket transport that turns SNI off whenever SSL verification is
+    # off, which WordPress does for every request to its own site. Behind
+    # CloudFront's SNI-only certificates those handshakes fail: Site Health's
+    # REST checks, plugins' background job runners and auto-update checks all
+    # break. intl and imagick are what Site Health recommends; Imagick is
+    # WordPress's preferred image editor.
+    - name: Install PHP extensions for WordPress
+      apt:
+        name:
+          - lsphp{{ php_version }}-curl
+          - lsphp{{ php_version }}-intl
+          - lsphp{{ php_version }}-imagick
+        state: present
 
     - name: Install AWS CLI if not present
       shell: |

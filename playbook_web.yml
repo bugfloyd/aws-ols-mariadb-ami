@@ -1,9 +1,10 @@
 # Web tier image. Runs OpenLiteSpeed and PHP only: the database lives in RDS
-# and the document root lives on EFS, so nothing stateful is installed here.
+# and the document root lives on shared NFS storage, so nothing stateful is
+# installed here.
 #
 # Deliberately omitted compared to playbook.yml:
 #   playbook_db.yml         - MariaDB, replaced by RDS
-#   playbook_phpmyadmin.yml - would be shadowed by the EFS mount at /var/www
+#   playbook_phpmyadmin.yml - would be shadowed by the shared mount at /var/www
 #   playbook_init.yml       - generates per-instance credentials, which is
 #                             meaningless when instances are interchangeable
 #   backup/playbook.yml     - replaced by RDS automated backups and AWS Backup
