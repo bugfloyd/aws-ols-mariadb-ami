@@ -11,7 +11,8 @@ variable "aws_region" {
 #
 #   web        - web tier only, for use behind a load balancer with shared
 #                storage and a managed database. No MariaDB, no phpMyAdmin, no
-#                per-instance credentials. Adds EFS and MySQL client tooling.
+#                per-instance credentials. Adds NFS and MySQL client tooling,
+#                and the PHP extensions WordPress needs (curl, intl, imagick).
 variable "profile" {
   type    = string
   default = "standalone"
@@ -48,7 +49,7 @@ locals {
 
   ami_description = (
     var.profile == "web"
-    ? "Ubuntu 24 web tier: OpenLiteSpeed, LSPHP, EFS and MySQL client tooling"
+    ? "Ubuntu 24 web tier: OpenLiteSpeed, LSPHP with curl/intl/imagick, NFS and MySQL client tooling"
     : "Ubuntu 24 based API including: OpenLightSpeed, LSPHP, MariaDB"
   )
 
